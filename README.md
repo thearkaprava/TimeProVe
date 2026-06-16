@@ -1,25 +1,25 @@
-<h1 align="center">TIMEPROVE: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living</h1>
+<h1 align="center"><span style="font-variant: small-caps;">TimeProVe</span>: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living</h1>
 
 <!-- <h3 align="center"><a href="https://arxiv.org/pdf/2501.13106" style="color:#9C276A">
 VideoLLaMA 3: Frontier Multimodal Foundation Models for Video Understanding</a></h3>
 <h5 align="center"> If our project helps you, please give us a star ⭐ on GitHub to support us. 🙏🙏 </h2> -->
 
-Long Video Question Answering (LVQA) requires identifying sparse, query-relevant evidence within hours-long untrimmed videos. Existing approaches either process videos densely with large vision-language models (VLMs), incurring prohibitive computational cost, or rely on sparse caption-based reasoning, which often misses temporally localized and motion-centric evidence. We introduce **TIMEPROVE**, a cost-efficient hybrid framework for temporally grounded reasoning in long videos. TIMEPROVE first employs lightweight modules to generate action-grounded answer–evidence hypotheses and subsequently invokes an expensive VLM only for targeted verification. The core of our framework lies in the **Action-based Candidate Evidence (ACE)** module, which converts temporally localized actions into query-conditioned candidate answers and supporting evidence windows through lightweight LLM reasoning. We further introduce **OPENTSUBENCH (OTB)**, an open-ended benchmark designed to evaluate temporally grounded reasoning in real-world Activities of Daily Living (ADL) scenarios. Experiments show that TIMEPROVE outperforms the strongest baseline on OTB by 7.3%, while reducing VLM calls by 75% and inference cost by 93%. Furthermore, without explicit temporal grounding training, TIMEPROVE achieves competitive performance on CHARADES-STA, and reaches state-of-the-art results when enhanced with grounding VLMs.
+Long Video Question Answering (LVQA) requires identifying sparse, query-relevant evidence within hours-long untrimmed videos. Existing approaches either process videos densely with large vision-language models (VLMs), incurring prohibitive computational cost, or rely on sparse caption-based reasoning, which often misses temporally localized and motion-centric evidence. We introduce **<span style="font-variant: small-caps;">TimeProVe</span>**, a cost-efficient hybrid framework for temporally grounded reasoning in long videos. <span style="font-variant: small-caps;">TimeProVe</span> first employs lightweight modules to generate action-grounded answer–evidence hypotheses and subsequently invokes an expensive VLM only for targeted verification. The core of our framework lies in the **Action-based Candidate Evidence (ACE)** module, which converts temporally localized actions into query-conditioned candidate answers and supporting evidence windows through lightweight LLM reasoning. We further introduce **OPENTSUBENCH (OTB)**, an open-ended benchmark designed to evaluate temporally grounded reasoning in real-world Activities of Daily Living (ADL) scenarios. Experiments show that <span style="font-variant: small-caps;">TimeProVe</span> outperforms the strongest baseline on OTB by 7.3%, while reducing VLM calls by 75% and inference cost by 93%. Furthermore, without explicit temporal grounding training, <span style="font-variant: small-caps;">TimeProVe</span> achieves competitive performance on CHARADES-STA, and reaches state-of-the-art results when enhanced with grounding VLMs.
 
 ## Overview
 
-TIMEPROVE follows a **propose → verify** design:
+<span style="font-variant: small-caps;">TimeProVe</span> follows a **propose → verify** design:
 
 1. **Propose (lightweight):** MS-Temba action-detection scores are thresholded into a per-video action timeline. A text-only LLM (ACE) ranks temporal windows by query relevance, proposes tentative answers from action labels and timestamps, and selects which short clips merit VLM inspection.
 2. **Verify (targeted VLM):** For each candidate window, a short clip is extracted and passed to a VLM for query-conditioned description and final answer generation. A lightweight confidence check decides whether to stop or continue to the next window.
 
 <p align="center">
-  <img src="assets/timeprove_arch.png" alt="TIMEPROVE architecture" width="900"/>
+  <img src="assets/timeprove_arch.png" alt="TimeProVe architecture" width="900"/>
 </p>
 
 ## Prepare the environment
 
-TIMEPROVE builds on [VideoLLaMA 3](https://github.com/DAMO-NLP-SG/VideoLLaMA3) for local VLM inference. Use the same dependency stack:
+<span style="font-variant: small-caps;">TimeProVe</span> builds on [VideoLLaMA 3](https://github.com/DAMO-NLP-SG/VideoLLaMA3) for local VLM inference. Use the same dependency stack:
 
 **Basic requirements**
 
@@ -96,7 +96,7 @@ Example OTB record (`data/otb_bench.json`):
 
 ### MS-Temba action-detection predictions
 
-TIMEPROVE expects per-frame MS-Temba predictions as a pickle file keyed by `video_id`:
+<span style="font-variant: small-caps;">TimeProVe</span> expects per-frame MS-Temba predictions as a pickle file keyed by `video_id`:
 
 ```bash
 # Default path used by the run scripts
@@ -117,7 +117,7 @@ export MODEL_PATH=DAMO-NLP-SG/VideoLLaMA3-7B
 
 See [VideoLLaMA 3 model zoo](https://github.com/DAMO-NLP-SG/VideoLLaMA3#earth_americas-model-zoo) for official weights.
 
-## Run TIMEPROVE on OTB
+## Run <span style="font-variant: small-caps;">TimeProVe</span> on OTB
 
 Two end-to-end drivers are provided under `scripts/`. Both shard work across GPUs, write per-question JSON under a workdir, merge results, and run accuracy evaluation.
 
@@ -227,11 +227,11 @@ TimeProVe/
 
 <!-- ## Citation
 
-If you use TIMEPROVE, OTB, or this code in your research, please cite:
+If you use <span style="font-variant: small-caps;">TimeProVe</span>, OTB, or this code in your research, please cite:
 
 ```bibtex
 @article{sinha2026timeprove,
-  title={TIMEPROVE: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living},
+  title={TimeProVe: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living},
   author={Sinha, Arkaprava and Raj, Monish Soundar and Wang, Pu and Helmy, Ahmed and Das, Srijan},
   journal={arXiv preprint arXiv:TBD},
   year={2026}
@@ -240,4 +240,4 @@ If you use TIMEPROVE, OTB, or this code in your research, please cite:
 
 ## Acknowledgement
 
-TIMEPROVE builds on [MS-Temba](https://github.com/thearkaprava/MS-Temba) for temporally localized action proposals, [VideoLLaMA 3](https://github.com/DAMO-NLP-SG/VideoLLaMA3) for efficient video-language inference, and the [Toyota Smarthome Untrimmed](https://project.inria.fr/toyotasmarthome/) dataset. We thank the authors for their open-source contributions.
+<span style="font-variant: small-caps;">TimeProVe</span> builds on [MS-Temba](https://github.com/thearkaprava/MS-Temba) for temporally localized action proposals, [VideoLLaMA 3](https://github.com/DAMO-NLP-SG/VideoLLaMA3) for efficient video-language inference, and the [Toyota Smarthome Untrimmed](https://project.inria.fr/toyotasmarthome/) dataset. We thank the authors for their open-source contributions.
