@@ -1,0 +1,5 @@
+# Pipeline outputs
+workdirs/
+
+# Python bytecode / caches
+__pycache__/
