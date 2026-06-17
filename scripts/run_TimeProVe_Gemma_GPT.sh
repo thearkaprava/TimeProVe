@@ -34,7 +34,7 @@ GEMMA4_DTYPE="${GEMMA4_DTYPE:-float16}"
 GPU_IDS="${GPU_IDS:-0,1,2,3,4,5,6,7}"
 
 # ── OpenAI / GPT VLM settings ──────────────────────────────────────────────
-OPENAI_API_KEY="${OPENAI_API_KEY:-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}"
+OPENAI_API_KEY="${OPENAI_API_KEY:-YOUR_API_KEY}"
 GPT_VLM_MODEL="${GPT_VLM_MODEL:-gpt-4o}"
 GPT_DESC_MAX_FRAMES="${GPT_DESC_MAX_FRAMES:-20}"
 
