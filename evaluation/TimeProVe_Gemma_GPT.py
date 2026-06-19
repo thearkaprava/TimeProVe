@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Interpretable VLM pipeline with v10 stage-1 temporal proposals (Gemma draft + GPT verifier).
+Interpretable VLM pipeline with stage-1 temporal proposals (Gemma draft + GPT verifier).
 
 Per question:
 1) Build ``video_actions_timeline`` from MS-TEMBA/AD pkl scores with a probability
    threshold, then build query-relevance-ordered temporal windows (atomic / query-guided
    Gemma merges / context). Neighbor-chain merging is replaced by a single text-only Gemma
    call that groups timeline indices that should be considered together to answer the
-   query; atomic and local context windows stay as in v10.
+   query; atomic and local context windows.
 2) In order of relevance: a **text-only Gemma** proposes a tentative answer from detected
    action labels and timestamps (prioritising actions overlapping the clip window), and that
    text is passed to GPT as guidance. Then: extract clip -> GPT query-conditioned window
@@ -76,9 +76,9 @@ _DEFAULT_CLASSES = _REPO_ROOT / "data" / "TSU_Action_list.txt"
 _DEFAULT_OTB_JSON = _REPO_ROOT / "data" / "smarthome.json"
 _DEFAULT_PKL = _REPO_ROOT / "data" / "TSU_best_AD.pkl"
 _DEFAULT_OTB_VIDEO_ROOT = Path("/data/vidlab_datasets/smarthome/untrimmed/Videos_mp4")
-_DEFAULT_SEG_PARENT = _REPO_ROOT / "workdirs" / "s2_vlm_desc_OTB_pred_tempseg_v10"
+_DEFAULT_SEG_PARENT = _REPO_ROOT / "workdirs" / "s2_vlm_desc_OTB"
 _DEFAULT_VIDEO_SEG_ROOT = _DEFAULT_SEG_PARENT / "video_segments"
-_DEFAULT_FINAL_DIR = _REPO_ROOT / "workdirs" / "s3_llm_final_ans_OTB_pred_tempseg_v10"
+_DEFAULT_FINAL_DIR = _REPO_ROOT / "workdirs" / "s3_llm_final_ans_OTB"
 _DEFAULT_GEMMA4_MODEL = "google/gemma-4-E2B-it"
 _MAX_REFINE_TRIES_FALLBACK = 10
 _MIN_SELECTED_SEGMENT_SEC = 4.0
@@ -523,7 +523,7 @@ def _window_dict_to_segment(
     *,
     video_duration: float | None,
 ) -> dict[str, Any]:
-    """Convert a v10 temporal window dict to start_time/end_time segment for clipping."""
+    """Convert a temporal window dict to start_time/end_time segment for clipping."""
     meta = window.get("metadata") or {}
     wt = str(window.get("window_type", ""))
     r = meta.get("relevance_rank", "")
@@ -532,7 +532,7 @@ def _window_dict_to_segment(
             "start_time": float(window["start"]),
             "end_time": float(window["end"]),
             "justification": (
-                f'v10 stage-1 window rank {r} ({wt}): '
+                f'stage-1 window rank {r} ({wt}): '
                 f'{meta.get("start_action_label", "")} → {meta.get("end_action_label", "")}'
             ),
         },
@@ -1686,7 +1686,7 @@ def _rerank_remaining_windows_by_descriptions(
                            what has already been seen.
       3. query_overlap   — noun/verb terms from the question that appear in the window's
                            action labels (same as the original static ranking signal).
-      4. -prior_rank     — tie-breaker: preserve the original v10 relevance ordering.
+      4. -prior_rank     — tie-breaker: preserve the original relevance ordering.
     """
     if not remaining_windows or not description_texts:
         return remaining_windows, False
@@ -1958,8 +1958,7 @@ def _score_and_sort_windows(
 ) -> list[dict[str, Any]]:
     """
     Score every window, annotate each with ``metadata["relevance_score"]``,
-    and return the list sorted descending by composite score
-    (ties broken by the original v10 relevance_rank).
+    and return the list sorted descending by composite score.
 
     Each window dict is shallow-copied so the originals are not mutated.
     """
@@ -2571,7 +2570,7 @@ def main() -> int:
         "--skip-llm-query-timeline-merge",
         action="store_true",
         help=(
-            "Use v10's default windows (includes neighbor-chain merged spans) instead of one "
+            "Use default windows (includes neighbor-chain merged spans) instead of one "
             "query-guided Gemma pass to decide which timeline actions to merge for evidence."
         ),
     )
@@ -2684,7 +2683,7 @@ def main() -> int:
     parser.add_argument(
         "--score-lam-confidence",
         type=float,
-        default=0.20,
+        default=0.00,
         help=(
             "λ6: weight for R_confidence (overlap-weighted mean detection confidence "
             "of predicted actions in the window, derived from the pkl scores). "
@@ -2701,13 +2700,13 @@ def main() -> int:
     parser.add_argument(
         "--skip-confidence-refine",
         action="store_true",
-        help="Use only the single highest-relevance v10 window (one clip + GPT QA); skip confidence model and multi-window iteration.",
+        help="Use only the single highest-relevance window (one clip + GPT QA); skip confidence model and multi-window iteration.",
     )
     parser.add_argument(
         "--max-temporal-windows",
         type=int,
         default=0,
-        help="Max v10 windows to try in order (0 = no cap). Each window: clip -> describe -> confidence -> QA if confident.",
+        help="Max windows to try in order (0 = no cap). Each window: clip -> describe -> confidence -> QA if confident.",
     )
     parser.add_argument("--desc-glob", type=str, default="*.mp4")
     parser.add_argument(
@@ -2768,7 +2767,7 @@ def main() -> int:
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    log = logging.getLogger("pipeline_unified_v10_tempseg")
+    log = logging.getLogger("pipeline_unified_tempseg")
 
     if args.top_k_actions <= 0:
         log.error("--top-k-actions must be >= 1, got %s", args.top_k_actions)
@@ -2945,7 +2944,7 @@ def main() -> int:
                         cached_stage1 = str(cached.get("stage1_strategy") or "")
                         log.info(
                             "Reuse: temporal windows (%s) for %s from %s",
-                            "llm_merge" if want_llm_timeline_merge else "v10_default",
+                            "llm_merge" if want_llm_timeline_merge else "default",
                             question_id,
                             actions_json_path,
                         )
@@ -2968,7 +2967,7 @@ def main() -> int:
                 ordered_windows = compute_ordered_temporal_windows_for_query(
                     qstrip, video_actions_timeline, video_duration
                 )
-                stage1_strategy = "v10_compute_ordered_windows"
+                stage1_strategy = "compute_ordered_windows"
                 llm_timeline_merge_raw = ""
             else:
                 m_cap = (
@@ -2987,13 +2986,13 @@ def main() -> int:
                     video_id=video_id,
                     log=log,
                 )
-                stage1_strategy = "v10_llm_query_guided_merge"
+                stage1_strategy = "llm_query_guided_merge"
         else:
             stage1_strategy = cached_stage1 or (
-                "v10_llm_query_guided_merge" if want_llm_timeline_merge else "v10_compute_ordered_windows"
+                "llm_query_guided_merge" if want_llm_timeline_merge else "compute_ordered_windows"
             )
         if not ordered_windows:
-            log.error("%s: v10 produced no temporal windows", question_id)
+            log.error("%s: produced no temporal windows", question_id)
             continue
         ordered_windows, before_boost_applied = _prioritize_before_context_window(
             ordered_windows,
@@ -3074,7 +3073,7 @@ def main() -> int:
             "text_llm_backend": text_llm_runtime.get("backend"),
             "gpt_vlm_model": gpt_model,
             "stage1_strategy": stage1_strategy,
-            "refinement_policy": "v10_confidence_gate_iterative_windows",
+            "refinement_policy": "confidence_gate_iterative_windows",
             "before_context_boost_applied": before_boost_applied,
             "after_context_boost_applied": after_boost_applied,
             "temporal_intent": temporal_intent,
@@ -3097,9 +3096,9 @@ def main() -> int:
             "lookup_rank": 1,
             "code": "temporal_proposal",
             "name": (
-                "v10 temporal windows (query LLM merge)"
+                "temporal windows (query LLM merge)"
                 if want_llm_timeline_merge
-                else "v10 temporal windows"
+                else "temporal windows"
             ),
             "instruction": qa_instruction,
             "generation": gen_ans,
@@ -3109,7 +3108,7 @@ def main() -> int:
         }
         action_predictions: list[dict[str, Any]] = [proposal_pred]
 
-        v10_round_traces: list[dict[str, Any]] = []
+        round_traces: list[dict[str, Any]] = []
         final_answer_output: str | None = None
         final_answer_input: str | None = None
         final_answer_seg_keys: list[str] = []
@@ -3136,7 +3135,7 @@ def main() -> int:
             meta = wdict.get("metadata") or {}
             rank = int(meta.get("relevance_rank", processed_windows + 1))
             wtype = str(wdict.get("window_type", "win"))
-            round_tag = f"v10_r{rank:02d}_{wtype}"
+            round_tag = f"r{rank:02d}_{wtype}"
 
             round_result = _run_single_segment_round(
                 question_id=question_id,
@@ -3167,7 +3166,7 @@ def main() -> int:
             processed_windows += 1
             if rr.get("error"):
                 trace["skipped_reason"] = rr["error"]
-                v10_round_traces.append(trace)
+                round_traces.append(trace)
                 log.warning("%s: %s — %s", question_id, round_tag, rr.get("error"))
                 continue
 
@@ -3175,7 +3174,7 @@ def main() -> int:
             seg_keys_round = [f"{round_tag}:{k}" for k in round_result["seg_keys"]]
             if not texts:
                 trace["skipped_reason"] = "no_description_texts"
-                v10_round_traces.append(trace)
+                round_traces.append(trace)
                 continue
 
             last_round_texts = list(texts)
@@ -3253,7 +3252,7 @@ def main() -> int:
                 if reordered:
                     description_guided_reorders += 1
 
-            v10_round_traces.append(trace)
+            round_traces.append(trace)
 
             if not merged_first_desc_payload:
                 proposal_pred.update(rr)
@@ -3308,7 +3307,7 @@ def main() -> int:
                 stopped_on_relevance_hit = True
                 break
 
-        proposal_pred["v10_window_round_traces"] = v10_round_traces
+        proposal_pred["window_round_traces"] = round_traces
         proposal_pred["temporal_proposal_final"] = last_segment_dict
         proposal_pred["refinement_policy"] = "llm_confidence_gate_iterative_windows"
         proposal_pred["stopped_after_confident_window"] = winning_round_tag
@@ -3390,7 +3389,7 @@ def main() -> int:
             "top_k_actions": args.top_k_actions,
             "actions_used_for_qa": action_predictions,
             "action_predictions": action_predictions,
-            "decision_method": "v10_ordered_windows_llm_confidence_stop",
+            "decision_method": "ordered_windows_llm_confidence_stop",
             "temporal_intent": temporal_intent,
             "query_terms": sorted(query_terms),
             "score_lambdas": {

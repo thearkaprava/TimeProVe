@@ -1,21 +1,4 @@
 #!/usr/bin/env bash
-# Run the GPT+MSTemba interpretable pipeline on OTB.
-# MSTemba pkl predictions (thresholded) supply action names and temporal windows.
-# GPT-4o (or another vision model) generates clip descriptions; Gemma4
-# handles the text-only confidence check and final QA.
-#
-# Usage:
-#   OPENAI_API_KEY=sk-... ./run_GPT_mstemba_Gemma_pipeline_OTB.sh
-#   SAMPLE_COUNT=100 GPU_IDS=0,1 GPT_VLM_MODEL=gpt-4o-mini ./run_GPT_mstemba_Gemma_pipeline_OTB.sh --resume
-#   SCORE_LAM_SEMANTIC=1.0 SCORE_LAM_TEMPORAL=0.4 ... ./run_GPT_mstemba_Gemma_pipeline_OTB.sh
-#
-# Gemma GPU layout (matches pipeline --gemma4-gpu-ids / --gemma4-device-map):
-#   - Multi-shard (default): GPU_IDS lists one physical GPU per process. Each shard sets
-#     CUDA_VISIBLE_DEVICES to that GPU; use GEMMA4_DEVICE_MAP=cuda:0 (default). Do not set
-#     GEMMA4_GPU_IDS (each process only sees one GPU).
-#   - Single-process multi-GPU Gemma: set GPU_IDS to exactly one entry (shard count = 1),
-#     set GEMMA4_GPU_IDS="2,3,4" (physical IDs), and GEMMA4_DEVICE_MAP=auto
-#     (needs pip install accelerate). Only one Python job will run in that case.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -45,7 +28,7 @@ if [[ -z "$OPENAI_API_KEY" ]]; then
 fi
 
 # ── MSTemba pkl settings ────────────────────────────────────────────────────
-PKL_PATH="${PKL_PATH:-$REPO_ROOT/data/TSU_best_AD.pkl}"
+PKL_PATH="${PKL_PATH:-$REPO_ROOT/data/TSU_best_AD.pkl}" # MSTemba AD predictions
 EXTRACT_THRESHOLD="${EXTRACT_THRESHOLD:-0.50}"
 POOL_FACTOR="${POOL_FACTOR:-16}"
 MERGE_GAP_FRAMES="${MERGE_GAP_FRAMES:-1}"
@@ -63,15 +46,15 @@ SAMPLE_COUNT="${SAMPLE_COUNT:-3567}"
 EXTRACT_CONTEXT_SEC="${EXTRACT_CONTEXT_SEC:-7.0}"
 EXTRACT_MIN_CLIP_SEC="${EXTRACT_MIN_CLIP_SEC:-15.0}"
 
-BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/otb_bench.json}"
+BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/OpenTSUBench_qa.json}"
 OTB_ANNOTATIONS="${OTB_ANNOTATIONS:-$REPO_ROOT/data/smarthome.json}"
 OTB_ACTION_LIST="${OTB_ACTION_LIST:-$REPO_ROOT/data/TSU_Action_list.txt}"
-OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/data/vidlab_datasets/smarthome/untrimmed/Videos_mp4}"
+OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/toyota_smarthome_untrimmed_videos}"
 PREP_DIR="${PREP_DIR:-$REPO_ROOT/workdirs/otb_all_samples_gtquery_actnprop_desc/prepared_inputs}"
 DATA_PATH="${DATA_PATH:-$PREP_DIR/otb_all_samples.json}"
 
-FINAL_OUT_DIR="${FINAL_OUT_DIR:-$REPO_ROOT/workdirs/OTB/ablations/OTB_mstemba_GPT_Gemma_20May26/s3_llm_final_ans}"
-S2_OUT_DIR="${S2_OUT_DIR:-$REPO_ROOT/workdirs/OTB/ablations/OTB_mstemba_GPT_Gemma_20May26/s2_vlm_desc}"
+FINAL_OUT_DIR="${FINAL_OUT_DIR:-$REPO_ROOT/workdirs/OTB/ablations/TimeProVe_GPT_Gemma/s3_llm_final_ans}"
+S2_OUT_DIR="${S2_OUT_DIR:-$REPO_ROOT/workdirs/OTB/ablations/TimeProVe_GPT_Gemma/s2_vlm_desc}"
 VIDEO_SEG_ROOT="${VIDEO_SEG_ROOT:-$S2_OUT_DIR/video_segments}"
 LOG_DIR="${LOG_DIR:-$SCRIPT_DIR/logs_otb_gpt_mstemba}"
 

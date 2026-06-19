@@ -1,40 +1,4 @@
 #!/usr/bin/env bash
-# Run the interpretable VLM pipeline on OTB using MS-TEMBA AD predictions.
-# (pkl predictions -> threshold -> segments -> descriptions -> final QA)
-#
-# Usage:
-#   ./run_mstemba_interpretable_llm_newparser_pipeline_sample_OTB.sh
-#   SAMPLE_COUNT=100 GPU_IDS=0,1 AD_THRESHOLD=0.1 \
-#     ./run_mstemba_interpretable_llm_newparser_pipeline_sample_OTB.sh --resume
-#
-# Key env-var overrides:
-#   MODEL_PATH         HF id or local checkpoint (default: project fine-tune)
-#   GPU_IDS            Comma-separated GPU indices to use (default: 0,1,2,3)
-#   SAMPLE_COUNT       Max questions to prepare (default: 100; 0 = all)
-#   AD_THRESHOLD       Raw probability threshold on pkl scores (no sigmoid; default: 0.50)
-#   POOL_FACTOR        Temporal pooling factor (pkl_frame × pool_factor = video frame; default: 16)
-#   MERGE_GAP_FRAMES   Max pooled-frame gap to bridge when merging same-class segments (default: 1)
-#   EXTRACT_CONTEXT_SEC  Temporal padding added around each clip (default: 7.0)
-#   EXTRACT_MIN_CLIP_SEC Minimum clip length in seconds (default: 15.0)
-#   BENCHMARK_JSON     Path to stage3_quality_checked_final.json
-#   PKL_PATH           Path to AD pkl (default: data/TSU_best_AD.pkl)
-#   OTB_ACTION_LIST    Path to OTB action-list file (default: data/TSU_Action_list.txt)
-#   OTB_VIDEO_ROOT Directory containing <video_id>.mp4 files
-#   DATA_PATH          Prepared questions JSON (written by this script if absent)
-#   WORKDIR            Root workdir (overrides FINAL_OUT_DIR / S2_OUT_DIR defaults)
-#   FINAL_OUT_DIR      Per-question final-answer JSON output directory
-#   S2_OUT_DIR         Segment descriptions + llm_actions output directory
-#   VIDEO_SEG_ROOT     Extracted video clip root (default: $S2_OUT_DIR/video_segments)
-#   LOG_DIR            Directory for per-GPU log files
-#
-# λ grid search (use a distinct WORKDIR per combo so outputs do not overwrite):
-#   for SCORE_LAM_SEMANTIC in 1.0 0.5; do
-#     for SCORE_LAM_TEMPORAL in 0.4 0.2; do
-#       export SCORE_LAM_SEMANTIC SCORE_LAM_TEMPORAL
-#       export WORKDIR="$REPO_ROOT/workdirs/OTB/ablations/lam1_${SCORE_LAM_SEMANTIC}_lam2_${SCORE_LAM_TEMPORAL}"
-#       ./run_final_pipeline_MStemba_qwen_vlma3_OTB_ablations_28Apr26.sh
-#     done
-#   done
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -43,7 +7,7 @@ EVAL_DIR="$REPO_ROOT/evaluation"
 cd "$EVAL_DIR"
 
 # ── Configurable defaults ──────────────────────────────────────────────────────
-MODEL_PATH="${MODEL_PATH:-/home/asinha13/projects/LLM_Token_Selector/VideoLLaMA3/weights/videollama3_7b_local}"
+MODEL_PATH="${MODEL_PATH:-/path/to/videollama3_7b_weights}"
 GPU_IDS="${GPU_IDS:-0,1,2,3,4,5,6,7}"
 SAMPLE_COUNT="${SAMPLE_COUNT:-0}"
 AD_THRESHOLD="${AD_THRESHOLD:-0.50}"
@@ -61,12 +25,12 @@ SCORE_LAM_COST="${SCORE_LAM_COST:-1.0}"
 SCORE_LAM_FEEDBACK="${SCORE_LAM_FEEDBACK:-1.0}"
 SCORE_LAM_CONFIDENCE="${SCORE_LAM_CONFIDENCE:-0.00}"
 
-BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/otb_bench.json}"
-PKL_PATH="${PKL_PATH:-$REPO_ROOT/data/TSU_best_AD.pkl}"
+BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/OpenTSUBench_qa.json}"
+PKL_PATH="${PKL_PATH:-$REPO_ROOT/data/TSU_best_AD.pkl}" # MSTemba AD predictions
 OTB_ACTION_LIST="${OTB_ACTION_LIST:-$REPO_ROOT/data/TSU_Action_list.txt}"
-OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/data/vidlab_datasets/smarthome/untrimmed/Videos_mp4}"
+OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/toyota_smarthome_untrimmed_videos}"
 
-WORKDIR="${WORKDIR:-$REPO_ROOT/workdirs/OTB_mstemba_qwen_draft_vlma3_target_15June26}"
+WORKDIR="${WORKDIR:-$REPO_ROOT/workdirs/TimeProVe_qwen_vlma3}"
 export WORKDIR
 PREP_DIR="${PREP_DIR:-$WORKDIR/prepared_inputs}"
 DATA_PATH="${DATA_PATH:-$PREP_DIR/otb_mstemba_samples.json}"
