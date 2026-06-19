@@ -221,18 +221,19 @@ TimeProVe/
 └── videollama3/                  # VideoLLaMA 3 inference code
 ```
 
-<!-- ## Citation
-
-If you use TɪᴍᴇPʀᴏVᴇ, OTB, or this code in your research, please cite:
+## Citation
 
 ```bibtex
-@article{sinha2026timeprove,
-  title={TimeProVe: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living},
-  author={Sinha, Arkaprava and Raj, Monish Soundar and Wang, Pu and Helmy, Ahmed and Das, Srijan},
-  journal={arXiv preprint arXiv:TBD},
-  year={2026}
+@misc{sinha2026timeprove,
+      title={TimeProVe: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living}, 
+      author={Arkaprava Sinha and Dominick Reilly and Siddharth Krishnan and Hieu Le and Srijan Das},
+      year={2026},
+      eprint={2606.20561},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2606.20561}, 
 }
-``` -->
+```
 
 ## Acknowledgement
 

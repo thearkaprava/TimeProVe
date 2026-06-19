@@ -49,7 +49,7 @@ EXTRACT_MIN_CLIP_SEC="${EXTRACT_MIN_CLIP_SEC:-15.0}"
 BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/OpenTSUBench_qa.json}"
 OTB_ANNOTATIONS="${OTB_ANNOTATIONS:-$REPO_ROOT/data/smarthome.json}"
 OTB_ACTION_LIST="${OTB_ACTION_LIST:-$REPO_ROOT/data/TSU_Action_list.txt}"
-OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/toyota_smarthome_untrimmed_videos}"
+OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/smarthome/untrimmed/Videos_mp4}"
 PREP_DIR="${PREP_DIR:-$REPO_ROOT/workdirs/otb_all_samples_gtquery_actnprop_desc/prepared_inputs}"
 DATA_PATH="${DATA_PATH:-$PREP_DIR/otb_all_samples.json}"
 

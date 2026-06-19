@@ -28,7 +28,7 @@ SCORE_LAM_CONFIDENCE="${SCORE_LAM_CONFIDENCE:-0.00}"
 BENCHMARK_JSON="${BENCHMARK_JSON:-$REPO_ROOT/data/OpenTSUBench_qa.json}"
 PKL_PATH="${PKL_PATH:-$REPO_ROOT/data/TSU_best_AD.pkl}" # MSTemba AD predictions
 OTB_ACTION_LIST="${OTB_ACTION_LIST:-$REPO_ROOT/data/TSU_Action_list.txt}"
-OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/toyota_smarthome_untrimmed_videos}"
+OTB_VIDEO_ROOT="${OTB_VIDEO_ROOT:-/path/to/smarthome/untrimmed/Videos_mp4}"
 
 WORKDIR="${WORKDIR:-$REPO_ROOT/workdirs/TimeProVe_qwen_vlma3}"
 export WORKDIR
