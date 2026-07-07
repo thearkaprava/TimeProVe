@@ -1,3 +1,4 @@
+<div align="center">
 <h1 align="center">TɪᴍᴇPʀᴏVᴇ: Propose, then Verify for Efficient Long Video Temporal Reasoning in Activities of Daily Living</h1>
 
 <p>
@@ -8,6 +9,7 @@
     <img src="https://img.shields.io/badge/Hugging%20Face-Model%20Weights-ffcc4d.svg" alt="Data">
   </a>
 </p>
+</div>
 
 Long Video Question Answering (LVQA) requires identifying sparse, query-relevant evidence within hours-long untrimmed videos. Existing approaches either process videos densely with large vision-language models (VLMs), incurring prohibitive computational cost, or rely on sparse caption-based reasoning, which often misses temporally localized and motion-centric evidence. We introduce **TɪᴍᴇPʀᴏVᴇ**, a cost-efficient hybrid framework for temporally grounded reasoning in long videos. TɪᴍᴇPʀᴏVᴇ first employs lightweight modules to generate action-grounded answer–evidence hypotheses and subsequently invokes an expensive VLM only for targeted verification. The core of our framework lies in the **Action-based Candidate Evidence (ACE)** module, which converts temporally localized actions into query-conditioned candidate answers and supporting evidence windows through lightweight LLM reasoning. We further introduce **OPENTSUBENCH (OTB)**, an open-ended benchmark designed to evaluate temporally grounded reasoning in real-world Activities of Daily Living (ADL) scenarios. Experiments show that TɪᴍᴇPʀᴏVᴇ outperforms the strongest baseline on OTB by 7.3%, while reducing VLM calls by 75% and inference cost by 93%. Furthermore, without explicit temporal grounding training, TɪᴍᴇPʀᴏVᴇ achieves competitive performance on CHARADES-STA, and reaches state-of-the-art results when enhanced with grounding VLMs.
 
