@@ -6,7 +6,7 @@
     <img src="https://img.shields.io/badge/arXiv-2606.20561-b31b1b.svg" alt="arXiv">
   </a>
   <a href="https://huggingface.co/datasets/thearkaprava/OpenTSUBench/tree/main">
-    <img src="https://img.shields.io/badge/Hugging%20Face-Model%20Weights-ffcc4d.svg" alt="Data">
+    <img src="https://img.shields.io/badge/Hugging%20Face-Data-ffcc4d.svg" alt="Data">
   </a>
 </p>
 </div>
